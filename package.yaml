@@ -1,0 +1,21 @@
+name:                thl
+version:             0.1.0.0
+github:              "githubuser/thl"
+license:             BSD3
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+dependencies:
+- base >= 4.7 && < 5
+- monad-logger
+- template-haskell
+- mtl
+- time
+- fast-logger
+- string-interpolate
+
+library:
+  source-dirs: src
+  exposed-modules: Control.Monad.THLogger
