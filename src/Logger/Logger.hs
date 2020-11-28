@@ -1,5 +1,5 @@
 {-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -17,7 +17,7 @@ class Monad m => MonadLogger (m :: * -> *) a | m -> a where
   putLog :: LogLevel -> Loc -> LogStr -> m a
 
 instance (Monoid log) => MonadTrans (LoggerT timed log) where
-  lift action = LoggerT $ \_ -> (\a -> (a, mempty)) <$> action
+  lift action = LoggerT $ const $ (, mempty) <$> action
 
 instance (Monoid log, MonadIO m) => MonadIO (LoggerT timed log m) where
   liftIO = lift . liftIO 
@@ -35,10 +35,7 @@ instance Monad m => Functor (LoggerT timed log m) where
 
 instance (Monoid log, Monad m) => Applicative (LoggerT timed log m) where
   pure a = LoggerT $ \_ -> pure (a, mempty)
-  l <*> r = do
-    l' <- l
-    r' <- r
-    pure $ l' r'
+  l <*> r = l >>= (<$> r)
 
 instance (Monoid log, Monad m) => Monad (LoggerT timed log m) where
   LoggerT logger >>= f = LoggerT $ \logFunc -> do
@@ -77,7 +74,7 @@ ioLogFunction :: LogType -> LogFunctionT IO LogStr -> IO (LogFunctionT IO ())
 ioLogFunction logType logFunction = do
   (logger, _) <- newFastLogger logType
   let wrappedFunc a b c d = logFunction a b c d >>= logger
-  pure $ wrappedFunc
+  pure wrappedFunc
 
 defaultLogFunction :: Monad m => Maybe (m FormattedTime) -> LogFunctionT m LogStr
 defaultLogFunction time timed loc level str = do 

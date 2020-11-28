@@ -18,7 +18,6 @@ module Control.Monad.THLogger
   , mkLogger
   , runLogger
   , evalLogger
-  , runLoggerT
   , evalLoggerT
   , dbg
   , wrn
