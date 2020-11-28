@@ -1,6 +1,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE TupleSections #-}
-{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE UndecidableInstances#-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -8,25 +9,22 @@ module Logger.Logger where
 
 import Control.Monad.IO.Class (MonadIO(..))
 import Control.Monad.Trans (MonadTrans(..))
-import Control.Monad.Logger (LogLevel(..), LogStr, Loc(..), ToLogStr(..))
+import Control.Monad.Logger (LogLevel(..), LogStr, Loc(..), ToLogStr(..), MonadLogger(..))
 import System.Log.FastLogger.Types (FormattedTime)
 import System.Log.FastLogger (LogType, newFastLogger)
 import Data.Functor.Identity (Identity(..))
 
-class Monad m => MonadLogger (m :: * -> *) a | m -> a where
-  putLog :: LogLevel -> Loc -> LogStr -> m a
+instance (Monad m, MonadLogger m) => MonadLogger (LoggerT 'Timed () m) where
+  monadLoggerLog loc _ lvl msg = LoggerT $ \logFunc -> (\logged -> (logged, logged)) <$> logFunc True loc lvl (toLogStr msg) 
+
+instance (Monad m, MonadLogger m) => MonadLogger (LoggerT 'NoTime () m) where
+  monadLoggerLog loc _ lvl msg = LoggerT $ \logFunc -> (\logged -> (logged, logged)) <$> logFunc False loc lvl (toLogStr msg) 
 
 instance (Monoid log) => MonadTrans (LoggerT timed log) where
   lift action = LoggerT $ const $ (, mempty) <$> action
 
 instance (Monoid log, MonadIO m) => MonadIO (LoggerT timed log m) where
   liftIO = lift . liftIO 
-
-instance (Monoid log, Monad m) => MonadLogger (LoggerT 'Timed log m) log where
-  putLog lvl loc str = LoggerT $ \logFunc -> (\logged -> (logged, logged)) <$> logFunc True loc lvl str 
-
-instance (Monoid log, Monad m) => MonadLogger (LoggerT 'NoTime log m) log where
-  putLog lvl loc str = LoggerT $ \logFunc -> (\logged -> (logged, logged)) <$> logFunc False loc lvl str 
 
 instance Monad m => Functor (LoggerT timed log m) where 
   fmap f (LoggerT logger) = LoggerT $ \logFunc -> do
@@ -50,6 +48,9 @@ type Logger timed log = LoggerT timed log Identity
 
 type LogFunctionT m log = Bool -> Loc -> LogLevel -> LogStr -> m log
 type LogFunction log = LogFunctionT Identity log
+
+putLog :: (MonadLogger (LoggerT timed () m), ToLogStr msg) => Loc -> LogLevel -> msg -> LoggerT timed () m ()
+putLog a = monadLoggerLog a undefined
 
 runLogger :: Logger timed log a -> LogFunction log -> (a, log)
 runLogger logger = runIdentity . runLoggerT logger

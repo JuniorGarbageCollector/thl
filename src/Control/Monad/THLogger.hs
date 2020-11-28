@@ -1,7 +1,6 @@
 module Control.Monad.THLogger
   ( LoggerT(..)
   , Logger
-  , MonadLogger(..)
   , Timed(..)
   , Loc(..)
   , LogLevel(..)
@@ -30,7 +29,6 @@ import Logger.Logger
   , Logger
   , LogFunctionT
   , LogFunction
-  , MonadLogger(..)
   , Timed(..)
   , showLogLevel
   , ioLogFunction
