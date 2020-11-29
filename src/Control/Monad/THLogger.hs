@@ -1,17 +1,13 @@
 module Control.Monad.THLogger
-  ( LoggerT(..)
+  ( module FastLogger
+  , module LoggerMonad
+  , LoggerT(..)
   , Logger
   , Timed(..)
   , Loc(..)
   , LogLevel(..)
   , LogFunction
   , LogFunctionT
-  , LogType'(..)
-  , LogType
-  , LogStr
-  , MonadLogger(..)
-  , ToLogStr(..)
-  , defaultBufSize
   , showLogLevel
   , ioLogFunction
   , liftLogFunction
@@ -45,13 +41,8 @@ import Logger.Quasi (mkLogger)
 import Control.Monad.Logger (LogLevel(..))
 import Language.Haskell.TH.Syntax (Loc(..))
 import Language.Haskell.TH.Quote (QuasiQuoter)
-import System.Log.FastLogger 
-  ( LogType'(..)
-  , LogType
-  , LogStr
-  , defaultBufSize
-  )
-import Control.Monad.Logger (MonadLogger(..), ToLogStr(..))
+import qualified System.Log.FastLogger as FastLogger
+import qualified Control.Monad.Logger as LoggerMonad
 
 dbg, wrn, err, inf :: QuasiQuoter
 dbg = mkLogger LevelDebug

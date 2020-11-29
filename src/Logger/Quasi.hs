@@ -17,7 +17,7 @@ import Data.String.Interpolate (i)
 mkLogger :: LogLevel -> QuasiQuoter
 mkLogger lvl = QuasiQuoter 
   { quoteExp = \str ->
-    [| putLog lvl $(location >>= liftLoc) $(quoteExp i $ trim str) |]
+    [| putLog $(location >>= liftLoc) lvl $(quoteExp i $ trim str) |]
   , quotePat = error "Not implemented as pattern"
   , quoteType = error "Not implemented as type"
   , quoteDec = error "Not implemented as declaration"
