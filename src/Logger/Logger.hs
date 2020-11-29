@@ -49,7 +49,7 @@ type Logger timed log = LoggerT timed log Identity
 type LogFunctionT m log = Bool -> Loc -> LogLevel -> LogStr -> m log
 type LogFunction log = LogFunctionT Identity log
 
-putLog :: (MonadLogger (LoggerT timed () m), ToLogStr msg) => Loc -> LogLevel -> msg -> LoggerT timed () m ()
+putLog :: (MonadLogger m, ToLogStr msg) => Loc -> LogLevel -> msg -> m ()
 putLog a = monadLoggerLog a undefined
 
 runLogger :: Logger timed log a -> LogFunction log -> (a, log)
