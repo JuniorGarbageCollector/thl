@@ -10,6 +10,7 @@ module Control.Monad.THLogger
   , LogType
   , LogStr
   , MonadLogger(..)
+  , ToLogStr(..)
   , defaultBufSize
   , showLogLevel
   , ioLogFunction
@@ -50,7 +51,7 @@ import System.Log.FastLogger
   , LogStr
   , defaultBufSize
   )
-import Control.Monad.Logger (MonadLogger(..))
+import Control.Monad.Logger (MonadLogger(..), ToLogStr(..))
 
 dbg, wrn, err, inf :: QuasiQuoter
 dbg = mkLogger LevelDebug
