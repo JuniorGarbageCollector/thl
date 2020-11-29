@@ -41,8 +41,8 @@ import Logger.Quasi (mkLogger)
 import Control.Monad.Logger (LogLevel(..))
 import Language.Haskell.TH.Syntax (Loc(..))
 import Language.Haskell.TH.Quote (QuasiQuoter)
-import qualified System.Log.FastLogger as FastLogger
-import qualified Control.Monad.Logger as LoggerMonad
+import System.Log.FastLogger as FastLogger
+import Control.Monad.Logger as LoggerMonad
 
 dbg, wrn, err, inf :: QuasiQuoter
 dbg = mkLogger LevelDebug
