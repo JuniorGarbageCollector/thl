@@ -14,11 +14,11 @@ import System.Log.FastLogger.Types (FormattedTime)
 import System.Log.FastLogger (LogType, newFastLogger)
 import Data.Functor.Identity (Identity(..))
 
-instance (Monad m, MonadLogger m) => MonadLogger (LoggerT 'Timed () m) where
-  monadLoggerLog loc _ lvl msg = LoggerT $ \logFunc -> (\logged -> (logged, logged)) <$> logFunc True loc lvl (toLogStr msg) 
+instance (Monad m) => MonadLogger (LoggerT 'Timed () m) where
+  monadLoggerLog loc _ lvl msg = LoggerT $ \logFunc -> (const ((), ())) <$> logFunc True loc lvl (toLogStr msg) 
 
-instance (Monad m, MonadLogger m) => MonadLogger (LoggerT 'NoTime () m) where
-  monadLoggerLog loc _ lvl msg = LoggerT $ \logFunc -> (\logged -> (logged, logged)) <$> logFunc False loc lvl (toLogStr msg) 
+instance (Monad m) => MonadLogger (LoggerT 'NoTime () m) where
+  monadLoggerLog loc _ lvl msg = LoggerT $ \logFunc -> (const ((), ())) <$> logFunc False loc lvl (toLogStr msg) 
 
 instance (Monoid log) => MonadTrans (LoggerT timed log) where
   lift action = LoggerT $ const $ (, mempty) <$> action
